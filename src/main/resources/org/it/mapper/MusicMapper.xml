@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="org.it.mapper.MusicMapper">
+  
+  <insert id = "insert">
+  	insert into tbl_music (mno, pno, title, artist, link)
+  	values (null, #{pno}, #{title}, #{artist}, #{link})
+  </insert>
+  
+  <select id="read" resultType="org.it.domain.MusicVO">
+  	select * from tbl_music where mno = #{mno}
+  </select>
+  
+  <delete id="delete">
+  	delete from tbl_music where mno=#{mno}
+  </delete>
+  
+  <update id="update">
+  	update tbl_music 
+  	set title = #{title}, artist = #{artist}, link = #{link}, updateDate = now()
+  	where mno = #{mno}
+  </update>
+  
+  <select id="getListWithPaging" resultType="org.it.domain.MusicVO">
+  	<![CDATA[select mno, pno, title, artist, link, addDate, updateDate  from(
+  	select mno, pno, title, artist, link, addDate, updateDate from tbl_music
+  			where pno = #{pno} 
+  			order by mno desc) as tbl_music
+  			limit #{cri.skip}, #{cri.amount} ]]> 
+  </select>
+  
+  <select id = "getCountByPno" resultType="int">
+  <![CDATA[select count(mno) from tbl_music where pno = #{pno}]]>
+  </select>
+  
+  </mapper>

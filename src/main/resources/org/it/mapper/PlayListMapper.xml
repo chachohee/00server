@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="org.it.mapper.PlayListMapper">
+  
+  <select id="getList" resultType="org.it.domain.PlayListVO">
+  <![CDATA[ select*from tbl_playlist where pno>0 ]]>
+  </select>
+ 
+  <insert id="insertSelectKey">
+  	<selectKey keyProperty="pno" order="BEFORE" resultType="long">
+  		select max(bno)+1 from tbl_playlist
+  	</selectKey>
+  	insert into tbl_playlist(pno,name)
+  	values (#{pno}, #{name})
+  </insert>
+  
+  <select id="read" resultType="org.it.domain.PlayListVO">
+  	select * from tbl_playlist where pno=#{pno}
+  </select>
+  
+  <delete id="delete">
+  	delete from tbl_playlist where pno=#{pno}
+  </delete>
+  
+  <update id="update">
+  	update tbl_playlist
+  	set name = #{name},
+  		updateDate = now()
+  		where pno = #{pno}
+  </update>
+  
+  <!-- 페이징 쿼리문 -->
+  <select id="getListWithPaging" resultType="org.it.domain.BoardVO">
+  select * from (
+  	 select * from tbl_playlist
+  	 	<if test="keyword !=null">
+  	 		where name like concat('%,#{keywod},'%')
+  	 	</if>
+  		order by pno desc ) as tbl_playlist
+  	limit #{skip},#{amount}
+  </select>
+  
+  <select id="getTotalCount" resultType="int">
+  	select count(*) from tbl_playlist
+  	 <if test="keyword !=null">
+  	 		where name like concat('%,#{keywod},'%')
+  	 </if>	
+  </select>
+  
+  </mapper>

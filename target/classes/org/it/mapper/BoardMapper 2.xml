@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="org.it.mapper.BoardMapper">
+  
+  <select id="getList" resultType="org.it.domain.BoardVO">
+  <![CDATA[ select*from tbl_board where bno>0 ]]>
+  </select>
+  
+  <insert id="insert">
+  	insert into tbl_board (bno, title, content, writer)
+  	values (null, #{title}, #{content}, #{writer})
+  </insert>
+  
+  <insert id="insertSelectKey">
+  	<selectKey keyProperty="bno" order="BEFORE" resultType="long">
+  		select max(bno)+1 from tbl_board
+  	</selectKey>
+  	insert into tbl_board(bno, title, content, writer)
+  	values (#{bno}, #{title}, #{content}, #{writer})
+  </insert>
+  
+  <select id="read" resultType="org.it.domain.BoardVO">
+  	select*from tbl_board where bno=#{bno}
+  </select>
+  
+  <delete id="delete">
+  	delete from tbl_board where bno=#{bno}
+  </delete>
+  
+  <update id="update">
+  	update tbl_board
+  	set title = #{title},
+  		content = #{content},
+  		writer = #{writer},
+  		updateDate = now()
+  		where bno = #{bno}
+  </update>
+  
+  <!-- 검색 조건문 -->
+  <sql id = "criteria">
+  	<trim prefix="where (" suffix=")" prefixOverrides="OR">
+  		<foreach collection="typeArr" item="type">
+  			<trim prefix="OR">
+  				<choose>
+  					<when test="type == 'T'.toString()">
+  						title like concat('%',#{keyword},'%')
+  					</when>
+  					<when test="type == 'C'.toString()">
+  						content like concat('%',#{keyword},'%')
+  					</when>
+  					<when test="type == 'W'.toString()">
+  						writer like concat('%',#{keyword},'%')
+  					</when>
+  				</choose>
+  			</trim>
+  		</foreach>
+  	</trim>
+  </sql>
+  
+  <!-- 페이징 쿼리문 -->
+  <select id="getListWithPaging" resultType="org.it.domain.BoardVO">
+  select * from (
+  	 select * from tbl_board
+  	 	<if test="keyword != null">
+  	 		<include refid="criteria"></include>
+  	 	</if>
+  		order by bno desc ) as tbl_board 
+  	limit #{skip},#{amount}
+  </select>
+  
+  <select id="getTotalCount" resultType="int">
+  	select count(*) from tbl_board
+  		<if test="keyword != null">
+  	 		<include refid="criteria"></include>
+  	 	</if> 
+  	
+  </select>
+  </mapper>
